@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -126,9 +128,12 @@ func (s *IssueAlertsService) getIssueAlertFromTaskDetail(ctx context.Context, or
 	if err != nil {
 		return nil, nil, err
 	}
-
+	retries, err := strconv.Atoi(os.Getenv("GO_SENTRY_GET_TASK_DETAIL_RETRIES"))
+	if err != nil {
+		retries = 12
+	}
 	var resp *Response
-	for i := 0; i < 5; i++ {
+	for i := 0; i < retries; i++ {
 		// TODO: Read poll interval from context
 		time.Sleep(5 * time.Second)
 
