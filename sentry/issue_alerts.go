@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
+)
+
+const (
+	TaskDetailRetryCountCtxKey   = "taskDetailRetryCount"
+	TaskDetailPollIntervalCtxKey = "taskDetailPollInterval"
 )
 
 // IssueAlert represents an issue alert configured for this project.
@@ -128,14 +131,12 @@ func (s *IssueAlertsService) getIssueAlertFromTaskDetail(ctx context.Context, or
 	if err != nil {
 		return nil, nil, err
 	}
-	retries, err := strconv.Atoi(os.Getenv("GO_SENTRY_GET_TASK_DETAIL_RETRIES"))
-	if err != nil {
-		retries = 12
-	}
+	retryCount := ctx.Value(TaskDetailRetryCountCtxKey).(int)
+	pollInterval := ctx.Value(TaskDetailPollIntervalCtxKey).(int)
 	var resp *Response
-	for i := 0; i < retries; i++ {
+	for i := 0; i < retryCount; i++ {
 		// TODO: Read poll interval from context
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(pollInterval) * time.Second)
 
 		taskDetail := new(IssueAlertTaskDetail)
 		resp, err := s.client.Do(ctx, req, taskDetail)
