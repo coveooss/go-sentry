@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+const (
+	TaskDetailRetryCountCtxKey   = "taskDetailRetryCount"
+	TaskDetailPollIntervalCtxKey = "taskDetailPollInterval"
+)
+
 // IssueAlert represents an issue alert configured for this project.
 // https://github.com/getsentry/sentry/blob/22.5.0/src/sentry/api/serializers/models/rule.py#L131-L155
 type IssueAlert struct {
@@ -126,11 +131,12 @@ func (s *IssueAlertsService) getIssueAlertFromTaskDetail(ctx context.Context, or
 	if err != nil {
 		return nil, nil, err
 	}
-
+	retryCount := ctx.Value(TaskDetailRetryCountCtxKey).(int)
+	pollInterval := ctx.Value(TaskDetailPollIntervalCtxKey).(int)
 	var resp *Response
-	for i := 0; i < 5; i++ {
+	for i := 0; i < retryCount; i++ {
 		// TODO: Read poll interval from context
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(pollInterval) * time.Second)
 
 		taskDetail := new(IssueAlertTaskDetail)
 		resp, err := s.client.Do(ctx, req, taskDetail)
