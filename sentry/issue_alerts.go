@@ -128,7 +128,7 @@ func (s *IssueAlertsService) getIssueAlertFromTaskDetail(ctx context.Context, or
 	}
 
 	var resp *Response
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		// TODO: Read poll interval from context
 		time.Sleep(5 * time.Second)
 
