@@ -1,4 +1,4 @@
-module github.com/jianyuan/go-sentry/v2
+module github.com/coveoos/go-sentry/v2
 
 go 1.19
 
